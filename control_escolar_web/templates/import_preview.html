@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+  <div>
+    <h4 class="m-0">Previsualización de importación</h4>
+    <div class="muted">Grupo: <span class="fw-semibold text-white">{{ cfg.name }}</span> · Archivo: <span class="fw-semibold text-white">{{ filename }}</span></div>
+  </div>
+  <a class="btn btn-outline-light" href="{{ url_for('group_detail', group_id=cfg.id) }}">Cancelar</a>
+</div>
+
+<div class="card card-soft">
+  <div class="card-body">
+    <h5 class="card-title">Modo de importación</h5>
+    <div class="muted small mb-2">
+      <ul class="mb-0">
+        <li><b>Reemplazar</b>: borra todos los alumnos del grupo y luego inserta lo del Excel.</li>
+        <li><b>Mezclar/Actualizar</b>: actualiza por “No” si existe, agrega si no existe. No borra los demás.</li>
+      </ul>
+    </div>
+
+    <form method="post" action="{{ url_for('excel_import_apply_route', group_id=cfg.id) }}" class="d-flex flex-wrap gap-2 align-items-center mb-3">
+      <select class="form-select" name="mode" style="max-width:280px;">
+        <option value="replace">Reemplazar grupo completo</option>
+        <option value="upsert">Mezclar/Actualizar por No</option>
+      </select>
+      <button class="btn btn-primary">Confirmar e importar</button>
+    </form>
+
+    <div class="table-responsive table-sticky">
+      <table class="table table-sm table-hover align-middle">
+        <thead>
+          <tr>
+            <th style="width:80px;">No</th>
+            <th>Nombre</th>
+            <th style="width:90px;" class="text-center">Trab</th>
+            <th style="width:90px;" class="text-center">Tar</th>
+            <th style="width:90px;" class="text-center">Exam</th>
+            <th style="width:90px;" class="text-center">Proy</th>
+            <th style="width:90px;" class="text-center">Part</th>
+            <th style="width:90px;" class="text-center">Glos</th>
+            <th style="width:90px;" class="text-center">Rev</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in preview[:200] %}
+            <tr>
+              <td>{{ r.numero }}</td>
+              <td class="fw-semibold">{{ r.nombre }}</td>
+              <td class="text-center">{{ r.trabajos }}</td>
+              <td class="text-center">{{ r.tareas }}</td>
+              <td class="text-center">{{ "%.1f"|format(r.examen) }}</td>
+              <td class="text-center">{{ "%.1f"|format(r.proyecto) }}</td>
+              <td class="text-center">{{ "%.1f"|format(r.participacion) }}</td>
+              <td class="text-center">{{ "%.1f"|format(r.glosario) }}</td>
+              <td class="text-center">{{ "%.1f"|format(r.revision) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if preview|length > 200 %}
+      <div class="muted small mt-2">Mostrando 200 de {{ preview|length }} filas (para rendimiento). Se importarán todas.</div>
+    {% else %}
+      <div class="muted small mt-2">Filas a importar: {{ preview|length }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

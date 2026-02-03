@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card border">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Grupos</h5>
+
+        <form class="d-flex gap-2 mb-3" method="post" action="{{ url_for('group_new') }}">
+          <input class="form-control" name="name" placeholder="Nombre del grupo (ej. 3-A)" required>
+          <button class="btn btn-primary">Crear</button>
+        </form>
+
+        <div class="list-group">
+          {% for g in groups %}
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+               href="{{ url_for('group_detail', group_id=g.id) }}">
+              <span class="fw-semibold">{{ g.name }}</span>
+              <span class="text-secondary small">{{ g.periodo_actual }}</span>
+            </a>
+          {% else %}
+            <div class="text-secondary">No hay grupos aún.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

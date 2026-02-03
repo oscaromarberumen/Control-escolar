@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title or "Control Escolar" }}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='app.css') }}" rel="stylesheet">
+
+  <script>
+    // Dark/Light persistente
+    (function () {
+      const saved = localStorage.getItem("theme") || "dark";
+      document.documentElement.setAttribute("data-theme", saved);
+    })();
+  </script>
+</head>
+
+<body class="min-vh-100">
+  <nav class="navbar navbar-expand-lg border-bottom">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="{{ url_for('index') }}">Control Escolar</a>
+      <div class="d-flex gap-2 align-items-center">
+        <button class="btn btn-sm btn-outline-secondary" id="btnTheme" type="button">🌙/☀️</button>
+        {% if session.get("logged_in") %}
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('settings_password') }}">Contraseña</a>
+          <a class="btn btn-sm btn-outline-danger" href="{{ url_for('logout') }}">Salir</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Toast container -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in (msgs or []) %}
+        <div class="toast align-items-center text-bg-{{ 'success' if category=='success' else 'danger' if category=='error' else 'secondary' }} border-0 mb-2"
+             role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">{{ msg }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

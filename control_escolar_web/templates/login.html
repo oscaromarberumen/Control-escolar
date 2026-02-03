@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5 col-lg-4">
+    <div class="card card-soft">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Iniciar sesión</h5>
+        <div class="muted small mb-3">Default: usuario <b>admin</b> / contraseña <b>admin</b></div>
+
+        <form method="post" class="row g-2">
+          <div class="col-12">
+            <label class="form-label">Usuario</label>
+            <input class="form-control" name="username" required autofocus>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Contraseña</label>
+            <input class="form-control" type="password" name="password" required>
+          </div>
+          <div class="col-12 mt-2">
+            <button class="btn btn-primary w-100">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

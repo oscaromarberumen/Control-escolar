@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+  <div>
+    <h3 class="mb-0">{{ cfg.name }}</h3>
+    <div class="text-secondary small">
+      Periodo: {{ cfg.periodo_actual }}
+      {% if cfg.teacher_name %} · Docente: {{ cfg.teacher_name }}{% endif %}
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('group_report', group_id=cfg.id) }}">Reporte</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('excel_export', group_id=cfg.id) }}">Exportar Excel</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('pdf_grupo', group_id=cfg.id) }}">PDF Grupo</a>
+
+    <!-- ELIMINAR GRUPO -->
+    <form method="post" action="{{ url_for('group_delete', group_id=cfg.id) }}"
+          onsubmit="return confirm('¿Eliminar el grupo y TODOS sus alumnos? Esta acción no se puede deshacer.');">
+      <button class="btn btn-danger">Eliminar grupo</button>
+    </form>
+  </div>
+</div>
+
+<!-- CRITERIO DE EVALUACIÓN DEL GRUPO (APLICA A TODOS) -->
+<div class="accordion mb-3" id="accCriterio">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingCriterio">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCriterio">
+        Criterio de evaluación del grupo (aplica a todos los alumnos)
+      </button>
+    </h2>
+
+    <div id="collapseCriterio" class="accordion-collapse collapse" data-bs-parent="#accCriterio">
+      <div class="accordion-body">
+        <form class="row g-2" method="post" action="{{ url_for('group_update', group_id=cfg.id) }}">
+          <div class="col-md-4">
+            <label class="form-label">Periodo</label>
+            <input class="form-control" name="periodo_actual" value="{{ cfg.periodo_actual }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Docente</label>
+            <input class="form-control" name="teacher_name" value="{{ cfg.teacher_name }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Mínimo aprobatorio</label>
+            <input class="form-control" type="number" step="0.1" min="0" max="10"
+                   name="min_aprobacion" value="{{ cfg.min_aprobacion }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Total trabajos</label>
+            <input class="form-control" type="number" min="0"
+                   name="total_trabajos" value="{{ cfg.total_trabajos }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Puntos trabajos</label>
+            <input class="form-control" type="number" step="0.1" min="0" max="100"
+                   name="puntos_trabajos" value="{{ cfg.puntos_trabajos }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Total tareas</label>
+            <input class="form-control" type="number" min="0"
+                   name="total_tareas" value="{{ cfg.total_tareas }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Puntos tareas</label>
+            <input class="form-control" type="number" step="0.1" min="0" max="100"
+                   name="puntos_tareas" value="{{ cfg.puntos_tareas }}">
+          </div>
+
+          <hr class="my-2">
+
+          <div class="col-md-3">
+            <label class="form-label">Label Proyecto</label>
+            <input class="form-control" name="label_proyecto" value="{{ cfg.label_proyecto }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Label Participación</label>
+            <input class="form-control" name="label_participacion" value="{{ cfg.label_participacion }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Label Glosario</label>
+            <input class="form-control" name="label_glosario" value="{{ cfg.label_glosario }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Label Revisión</label>
+            <input class="form-control" name="label_revision" value="{{ cfg.label_revision }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Extra 1 (opcional)</label>
+            <input class="form-control" name="label_extra1" value="{{ cfg.label_extra1 }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Extra 2 (opcional)</label>
+            <input class="form-control" name="label_extra2" value="{{ cfg.label_extra2 }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Extra 3 (opcional)</label>
+            <input class="form-control" name="label_extra3" value="{{ cfg.label_extra3 }}">
+          </div>
+
+          <div class="col-12 d-flex justify-content-end mt-2">
+            <button class="btn btn-primary">Guardar criterio</button>
+          </div>
+
+          <div class="col-12">
+            <div class="text-secondary small">
+              Nota: este criterio afecta el cálculo y los labels del quick-edit para todos los alumnos del grupo.
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border mb-3">
+  <div class="card-body">
+    <form class="row g-2 align-items-center" method="get">
+      <div class="col-md-6">
+        <input class="form-control" name="q" value="{{ q }}" placeholder="Buscar por nombre o número...">
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" name="per_page" onchange="this.form.submit()">
+          {% for n in [10,25,50,100] %}
+            <option value="{{ n }}" {% if per_page==n %}selected{% endif %}>{{ n }} por página</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-grid">
+        <button class="btn btn-primary">Buscar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card border">
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <form class="d-flex gap-2" method="post" action="{{ url_for('student_create', group_id=cfg.id) }}">
+        <!-- opcional (recomendado): por si el referrer se pierde -->
+        <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+
+        <input class="form-control" name="nombre" placeholder="Nombre del alumno" required>
+        <button class="btn btn-success">Agregar</button>
+      </form>
+
+      <form class="d-flex gap-2 ms-auto" method="post" action="{{ url_for('excel_import_upload', group_id=cfg.id) }}" enctype="multipart/form-data">
+        <input class="form-control" type="file" name="file" accept=".xlsx" required>
+        <button class="btn btn-outline-primary">Importar Excel</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('excel_download_template', group_id=cfg.id) }}">Plantilla</a>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr class="text-secondary">
+            <th style="width: 70px;">No</th>
+            <th>Nombre</th>
+            <th style="width: 110px;">Calif</th>
+            <th style="width: 140px;">Criterio</th>
+            <th style="width: 130px;"></th>
+          </tr>
+        </thead>
+        <tbody id="studentsTbody">
+          {% for st, cal, crit in rows %}
+            <tr class="student-row" data-student-id="{{ st.id }}">
+              <td class="fw-semibold">{{ st.numero }}</td>
+              <td>{{ st.nombre }}</td>
+              <td class="cal-cell">{{ "%.1f"|format(cal) }}</td>
+              <td class="crit-cell">
+                <span class="badge {% if crit=='Aprobado' %}text-bg-success{% elif crit=='Reprobado' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">
+                  {{ crit }}
+                </span>
+              </td>
+              <td class="text-end">
+                <!-- IMPORTANT: pasa next para regresar al mismo grupo -->
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{{ url_for('student_edit', student_id=st.id, next=request.full_path.rstrip('?')) }}">Editar</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('pdf_alumno', student_id=st.id) }}">PDF</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-secondary">Sin alumnos.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="text-secondary small">
+        Mostrando página {{ page }} / {{ pages }} ({{ total }} alumnos)
+      </div>
+      <div class="btn-group">
+        <a class="btn btn-outline-secondary btn-sm {% if page<=1 %}disabled{% endif %}"
+           href="{{ url_for('group_detail', group_id=cfg.id, q=q, per_page=per_page, page=page-1) }}">←</a>
+        <a class="btn btn-outline-secondary btn-sm {% if page>=pages %}disabled{% endif %}"
+           href="{{ url_for('group_detail', group_id=cfg.id, q=q, per_page=per_page, page=page+1) }}">→</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Quick Edit -->
+<div class="modal fade" id="quickEditModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar alumno (rápido)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="qe_id">
+        <div class="row g-2">
+          <div class="col-md-7">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" id="qe_nombre">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Trabajos</label>
+            <input class="form-control" type="number" id="qe_trabajos" min="0">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Tareas</label>
+            <input class="form-control" type="number" id="qe_tareas" min="0">
+          </div>
+          <div class="col-md-1 d-flex align-items-end">
+            <span class="badge text-bg-secondary w-100 text-center" id="qe_no">No</span>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Examen</label>
+            <input class="form-control" type="number" step="0.1" id="qe_examen" min="0" max="10">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" id="lbl_proyecto">Proyecto</label>
+            <input class="form-control" type="number" step="0.1" id="qe_proyecto" min="0" max="10">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" id="lbl_participacion">Participación</label>
+            <input class="form-control" type="number" step="0.1" id="qe_participacion" min="0" max="10">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" id="lbl_glosario">Glosario</label>
+            <input class="form-control" type="number" step="0.1" id="qe_glosario" min="0" max="10">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label" id="lbl_revision">Revisión</label>
+            <input class="form-control" type="number" step="0.1" id="qe_revision" min="0" max="10">
+          </div>
+          <div class="col-md-9">
+            <label class="form-label">Notas</label>
+            <input class="form-control" id="qe_notas">
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2 align-items-center">
+          <span class="text-secondary small">Calificación:</span>
+          <span class="fw-semibold" id="qe_cal">—</span>
+          <span class="ms-2 text-secondary small">Criterio:</span>
+          <span class="fw-semibold" id="qe_crit">—</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a class="btn btn-outline-secondary" id="qe_full_edit" href="#">Editar completo</a>
+        <button class="btn btn-primary" id="qe_save" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const modalEl = document.getElementById("quickEditModal");
+  const modal = new bootstrap.Modal(modalEl);
+
+  const $ = (id) => document.getElementById(id);
+
+  async function openQuickEdit(studentId) {
+    const res = await fetch(`/api/student/${studentId}`);
+    const data = await res.json();
+    if (!data.ok) return;
+
+    const st = data.student;
+    $("qe_id").value = st.id;
+    $("qe_nombre").value = st.nombre || "";
+    $("qe_trabajos").value = st.trabajos ?? 0;
+    $("qe_tareas").value = st.tareas ?? 0;
+    $("qe_examen").value = st.examen ?? 0;
+    $("qe_proyecto").value = st.proyecto ?? 0;
+    $("qe_participacion").value = st.participacion ?? 0;
+    $("qe_glosario").value = st.glosario ?? 0;
+    $("qe_revision").value = st.revision ?? 0;
+    $("qe_notas").value = st.notas || "";
+    $("qe_no").textContent = `#${st.numero}`;
+
+    $("qe_cal").textContent = st.cal ?? "—";
+    $("qe_crit").textContent = st.crit ?? "—";
+
+    $("lbl_proyecto").textContent = data.labels.proyecto;
+    $("lbl_participacion").textContent = data.labels.participacion;
+    $("lbl_glosario").textContent = data.labels.glosario;
+    $("lbl_revision").textContent = data.labels.revision;
+
+    // IMPORTANT: Editar completo preservando regreso a este grupo exacto
+    const back = window.location.pathname + window.location.search;
+    $("qe_full_edit").href = `/student/${st.id}/edit?next=${encodeURIComponent(back)}`;
+
+    modal.show();
+  }
+
+  async function saveQuickEdit() {
+    const id = $("qe_id").value;
+    const payload = {
+      nombre: $("qe_nombre").value,
+      trabajos: $("qe_trabajos").value,
+      tareas: $("qe_tareas").value,
+      examen: $("qe_examen").value,
+      proyecto: $("qe_proyecto").value,
+      participacion: $("qe_participacion").value,
+      glosario: $("qe_glosario").value,
+      revision: $("qe_revision").value,
+      notas: $("qe_notas").value,
+    };
+
+    const res = await fetch(`/api/student/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!data.ok) {
+      alert(data.error || "Error guardando");
+      return;
+    }
+
+    const row = document.querySelector(`tr.student-row[data-student-id="${id}"]`);
+    if (row) {
+      row.querySelector(".cal-cell").textContent = data.cal;
+      row.querySelector(".crit-cell .badge").textContent = data.crit;
+      row.querySelector(".crit-cell .badge").className =
+        "badge " + (data.crit === "Aprobado" ? "text-bg-success" : data.crit === "Reprobado" ? "text-bg-danger" : "text-bg-secondary");
+      row.children[1].textContent = payload.nombre;
+    }
+
+    $("qe_cal").textContent = data.cal;
+    $("qe_crit").textContent = data.crit;
+    modal.hide();
+  }
+
+  document.getElementById("qe_save").addEventListener("click", saveQuickEdit);
+
+  document.querySelectorAll("tr.student-row").forEach(tr => {
+    tr.addEventListener("dblclick", () => openQuickEdit(tr.dataset.studentId));
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+  <div>
+    <h4 class="m-0">Reporte del grupo</h4>
+    <div class="muted">Grupo: <span class="fw-semibold text-white">{{ cfg.name }}</span></div>
+  </div>
+  <a class="btn btn-outline-light" href="{{ url_for('group_detail', group_id=cfg.id) }}">Volver</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card card-soft">
+      <div class="card-body">
+        <h5 class="card-title">Resumen</h5>
+        <div class="row g-2">
+          <div class="col-6"><div class="badge badge-soft w-100 text-center py-2">Alumnos: {{ n }}</div></div>
+          <div class="col-6"><div class="badge badge-soft w-100 text-center py-2">% Aprob: {{ pct_aprob }}%</div></div>
+          <div class="col-6"><div class="badge badge-soft w-100 text-center py-2">Promedio: {{ avg }}</div></div>
+          <div class="col-6"><div class="badge badge-soft w-100 text-center py-2">Mediana: {{ median }}</div></div>
+        </div>
+        <hr class="border-opacity-25">
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="badge bg-success">Aprobados: {{ aprobado }}</span>
+          <span class="badge bg-danger">Reprobados: {{ reprobado }}</span>
+          <span class="badge bg-secondary">Pendientes: {{ pendiente }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-soft mt-3">
+      <div class="card-body">
+        <h5 class="card-title">Distribución</h5>
+        {% set maxv = (buckets.values()|max) if n else 1 %}
+        {% for k,v in buckets.items() %}
+          <div class="mb-2">
+            <div class="d-flex justify-content-between">
+              <div class="muted">{{ k }}</div>
+              <div class="muted">{{ v }}</div>
+            </div>
+            <div class="progress" style="height:10px;">
+              <div class="progress-bar" role="progressbar" style="width: {{ (v/maxv*100) if maxv else 0 }}%"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card card-soft">
+      <div class="card-body">
+        <h5 class="card-title">Top 5</h5>
+        {% if top5 %}
+          <ol class="mb-0">
+            {% for cal, st in top5 %}
+              <li class="mb-1">
+                <span class="fw-semibold">{{ st.nombre }}</span>
+                <span class="muted">· No {{ st.numero }}</span>
+                <span class="badge bg-success ms-2">{{ "%.1f"|format(cal) }}</span>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <div class="muted">Sin datos.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card card-soft mt-3">
+      <div class="card-body">
+        <h5 class="card-title">Bottom 5</h5>
+        {% if bottom5 %}
+          <ol class="mb-0">
+            {% for cal, st in bottom5 %}
+              <li class="mb-1">
+                <span class="fw-semibold">{{ st.nombre }}</span>
+                <span class="muted">· No {{ st.numero }}</span>
+                <span class="badge bg-danger ms-2">{{ "%.1f"|format(cal) }}</span>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <div class="muted">Sin datos.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

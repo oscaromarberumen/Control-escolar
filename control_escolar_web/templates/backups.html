@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+  <div>
+    <h4 class="m-0">Respaldos</h4>
+    <div class="muted">Carpeta: <span class="fw-semibold text-white">backups/</span></div>
+  </div>
+  <form method="post" action="{{ url_for('backups_create') }}">
+    <button class="btn btn-primary">Crear respaldo</button>
+  </form>
+</div>
+
+<div class="card card-soft">
+  <div class="card-body">
+    {% if files %}
+      <div class="table-responsive table-sticky">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Archivo</th>
+              <th style="width:140px;">Tamaño</th>
+              <th style="width:190px;">Fecha</th>
+              <th style="width:140px;" class="text-end">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in files %}
+              <tr>
+                <td class="fw-semibold">{{ f.name }}</td>
+                <td>{{ (f.size/1024)|round(1) }} KB</td>
+                <td>{{ f.mtime }}</td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-light" href="{{ url_for('backups_download', fname=f.name) }}">Descargar</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="muted">Aún no hay respaldos.</div>
+    {% endif %}
+    <div class="muted small mt-2">Auto-respaldo diario cuando se usa la app (si hay DB).</div>
+  </div>
+</div>
+{% endblock %}

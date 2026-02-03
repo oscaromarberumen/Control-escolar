@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+  <div class="d-flex flex-wrap gap-2 align-items-center">
+    <a class="btn btn-outline-secondary" href="{{ next_url }}">← Volver al grupo</a>
+
+    <div class="ms-1">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <h4 class="mb-0">Alumno #{{ st.numero }}</h4>
+        <span class="text-secondary">·</span>
+        <span class="text-secondary">{{ cfg.name }}</span>
+      </div>
+      <div class="text-secondary small">
+        Periodo: {{ cfg.periodo_actual }}
+        {% if cfg.teacher_name %} · Docente: {{ cfg.teacher_name }}{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center">
+    <div class="text-end">
+      <div class="small text-secondary">Calificación</div>
+      <div class="fw-semibold">{{ "%.1f"|format(cal) }}</div>
+    </div>
+
+    <div class="text-end">
+      <div class="small text-secondary">Criterio</div>
+      <span class="badge {% if crit=='Aprobado' %}text-bg-success{% elif crit=='Reprobado' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">
+        {{ crit }}
+      </span>
+    </div>
+
+    <a class="btn btn-outline-secondary" href="{{ url_for('pdf_alumno', student_id=st.id) }}">PDF</a>
+  </div>
+</div>
+
+<div class="card border">
+  <div class="card-body">
+
+    <!-- Navegación sin guardar (preserva next) -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="btn-group">
+        {% if prev_id %}
+          <a class="btn btn-outline-secondary btn-sm"
+             href="{{ url_for('student_edit', student_id=prev_id, next=next_url) }}">← Anterior</a>
+        {% else %}
+          <button class="btn btn-outline-secondary btn-sm" disabled>← Anterior</button>
+        {% endif %}
+
+        {% if next_id %}
+          <a class="btn btn-outline-secondary btn-sm"
+             href="{{ url_for('student_edit', student_id=next_id, next=next_url) }}">Siguiente →</a>
+        {% else %}
+          <button class="btn btn-outline-secondary btn-sm" disabled>Siguiente →</button>
+        {% endif %}
+      </div>
+
+      <form method="post" action="{{ url_for('student_delete_route', student_id=st.id) }}"
+            onsubmit="return confirm('¿Eliminar este alumno? Esta acción no se puede deshacer.');">
+        <button class="btn btn-outline-danger btn-sm">Eliminar alumno</button>
+      </form>
+    </div>
+
+    <form method="post" action="{{ url_for('student_edit', student_id=st.id, next=next_url) }}">
+      <!-- IMPORTANT: conservar el retorno al grupo -->
+      <input type="hidden" name="next" value="{{ next_url }}">
+
+      <div class="row g-3">
+        <div class="col-md-7">
+          <label class="form-label">Nombre</label>
+          <input class="form-control" name="nombre" value="{{ st.nombre }}" required>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Trabajos</label>
+          <input class="form-control" type="number" min="0" name="trabajos" value="{{ st.trabajos }}">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Tareas</label>
+          <input class="form-control" type="number" min="0" name="tareas" value="{{ st.tareas }}">
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+          <span class="badge text-bg-secondary w-100 text-center">#{{ st.numero }}</span>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Examen</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="examen" value="{{ st.examen }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_proyecto or 'Proyecto' }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="proyecto" value="{{ st.proyecto }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_participacion or 'Participación' }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="participacion" value="{{ st.participacion }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_glosario or 'Glosario' }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="glosario" value="{{ st.glosario }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_revision or 'Revisión' }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="revision" value="{{ st.revision }}">
+        </div>
+
+        {% if cfg.label_extra1 %}
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_extra1 }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="extra1" value="{{ st.extra1 }}">
+        </div>
+        {% endif %}
+
+        {% if cfg.label_extra2 %}
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_extra2 }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="extra2" value="{{ st.extra2 }}">
+        </div>
+        {% endif %}
+
+        {% if cfg.label_extra3 %}
+        <div class="col-md-3">
+          <label class="form-label">{{ cfg.label_extra3 }}</label>
+          <input class="form-control" type="number" step="0.1" min="0" max="10" name="extra3" value="{{ st.extra3 }}">
+        </div>
+        {% endif %}
+
+        <div class="col-md-9">
+          <label class="form-label">Notas</label>
+          <input class="form-control" name="notas" value="{{ st.notas }}">
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <div class="text-secondary small">
+          Consejo: usa “Anterior / Siguiente” para cambiar de alumno sin perder el regreso al grupo.
+        </div>
+
+        <div class="d-flex gap-2">
+          {% if prev_id %}
+            <button class="btn btn-outline-secondary" name="_action" value="prev" type="submit">← Guardar y anterior</button>
+          {% else %}
+            <button class="btn btn-outline-secondary" type="button" disabled>← Guardar y anterior</button>
+          {% endif %}
+
+          <button class="btn btn-primary" type="submit">Guardar</button>
+
+          {% if next_id %}
+            <button class="btn btn-outline-secondary" name="_action" value="next" type="submit">Guardar y siguiente →</button>
+          {% else %}
+            <button class="btn btn-outline-secondary" type="button" disabled>Guardar y siguiente →</button>
+          {% endif %}
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
+
