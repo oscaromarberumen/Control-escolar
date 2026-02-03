@@ -1,0 +1,1 @@
+Control Escolar es una aplicación web local desarrollada con Flask y SQLite para administrar grupos escolares y registrar calificaciones de alumnos. Está pensada para correr en una PC (localhost) y permite capturar, consultar y exportar información académica de forma rápida, con respaldo automático de la base de datos.
